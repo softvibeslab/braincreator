@@ -46,9 +46,29 @@ class Library:
             if len(result)>=limit:break
         return result
     def validate(self,response,evidence):
+        # Model output is untrusted JSON: malformed fields must not break the
+        # response or become plausible-looking text through str(None/dict).
+        if not isinstance(response,dict):response={}
         allowed={e['evidence_id']:e for e in evidence};cards=[]
-        for card in response.get('recommendations',[])[:3]:
-            node=self.nodes.get(card.get('node_id'));refs=[allowed[x] for x in card.get('evidence_ids',[]) if x in allowed and allowed[x]['node_id']==card.get('node_id')]
+        recommendations=response.get('recommendations',[])
+        if not isinstance(recommendations,list):recommendations=[]
+        for card in recommendations[:3]:
+            if not isinstance(card,dict):continue
+            node_id=card.get('node_id')
+            if not isinstance(node_id,str):continue
+            node=self.nodes.get(node_id)
+            evidence_ids=card.get('evidence_ids',[])
+            if isinstance(evidence_ids,str):evidence_ids=[evidence_ids]
+            if not isinstance(evidence_ids,list):evidence_ids=[]
+            refs=[];seen=set()
+            for eid in evidence_ids[:12]:
+                if not isinstance(eid,str) or eid in seen:continue
+                ref=allowed.get(eid)
+                if ref and ref['node_id']==node_id:
+                    refs.append(ref);seen.add(eid)
             if not node or not refs:continue
-            cards.append({'node_id':node['id'],'title':node['title'],'category':node['source'],'reason':str(card.get('reason',''))[:800],'evidence':[{'source':r['title'],'timestamp':r['timestamp'],'evidence_id':r['evidence_id']} for r in refs]})
-        return {'answer':str(response.get('answer',''))[:12000],'recommendations':cards,'library_version':self.version}
+            reason=card.get('reason','')
+            if not isinstance(reason,str):reason=''
+            cards.append({'node_id':node['id'],'title':node['title'],'category':node['source'],'reason':reason[:800],'evidence':[{'source':r['title'],'timestamp':r['timestamp'],'evidence_id':r['evidence_id']} for r in refs]})
+        answer=response.get('answer','')
+        return {'answer':answer[:12000] if isinstance(answer,str) else '', 'recommendations':cards,'library_version':self.version}
