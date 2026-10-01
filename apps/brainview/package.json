@@ -1,14 +1,12 @@
 {
-  "name": "aios-3d-brain",
+  "name": "brainview",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "start": "node serve.mjs",
-    "build:graph": "node build.mjs",
     "build:js": "esbuild src/app.js --bundle --format=esm --minify --outfile=dist/app.js --target=es2022",
-    "build": "npm run build:js && npm run build:graph"
+    "build": "npm run build:js"
   },
   "dependencies": {
     "3d-force-graph": "^1.80.0",

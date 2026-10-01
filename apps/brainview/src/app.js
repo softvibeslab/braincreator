@@ -1,3 +1,4 @@
+import {mountGuide} from './guide.js';
 // Portable 3D Brain: client.
 import ForceGraph3D from '3d-force-graph';
 import * as THREE from 'three';
@@ -217,6 +218,7 @@ function initGraph() {
     .strength(0);
 
   graph.graphData({ nodes: data.nodes, links: data.links });
+  mountGuide({navigate:id => {if(cinematic)toggleCinema(); selectNode(nodesById.get(id));}, currentNode:() => selected, hasNode:id => nodesById.has(id)});
   window.__brain = { graph, data, THREE, select: (id) => selectNode(nodesById.get(id)) };
 
   // Scene dressing

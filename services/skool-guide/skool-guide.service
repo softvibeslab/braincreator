@@ -1,0 +1,21 @@
+[Unit]
+Description=Skool Guide — isolated Hermes knowledge assistant
+After=network-online.target
+[Service]
+User=skoolguide
+Group=skoolguide
+WorkingDirectory=/opt/skool-guide
+EnvironmentFile=/var/lib/skool-guide/service.env
+ExecStart=/usr/local/lib/hermes-agent/venv/bin/python /opt/skool-guide/server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/skool-guide
+UMask=0077
+MemoryMax=1200M
+TasksMax=64
+[Install]
+WantedBy=multi-user.target

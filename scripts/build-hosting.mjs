@@ -1,0 +1,16 @@
+import {promises as fs} from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+const root=path.dirname(path.dirname(fileURLToPath(import.meta.url))),app=path.join(root,'apps/brainview');
+const {build}=await import(path.join(app,'node_modules/esbuild/lib/main.js'));
+const source=process.argv[2];if(!source)throw Error('Usage: node scripts/build-hosting.mjs /path/to/approved/hosting-export');
+const out=path.join(root,'hosting');await fs.mkdir(out,{recursive:true});
+await fs.cp(path.join(source,'data'),path.join(out,'data'),{recursive:true});
+await fs.mkdir(path.join(out,'dist'),{recursive:true});
+let src=await fs.readFile(path.join(app,'src/app.js'),'utf8');
+src=src.replace("fetch('/api/graph')","fetch('/data/graph.json')").replace("fetch(`/api/node?id=${encodeURIComponent(n.id)}${part === 'transcript' ? '&part=transcript' : ''}`)","fetch('/' + (part === 'transcript' ? n.hostedTranscript : n.hostedNote))").replace("$('d-reveal').hidden = n.kind === 'series';","$('d-reveal').hidden = true;").replace('<button class="link-btn" id="btn-rebuild">Rebuild from disk</button>','');
+const start=src.indexOf("  $('d-reveal').addEventListener('click'");const end=src.indexOf("  $('drawer').addEventListener",start);if(start<0||end<0)throw Error('Missing reveal handler');src=src.slice(0,start)+src.slice(end);src=src.replace("fetch('/api/graph?rebuild=1')","fetch('/data/graph.json')");
+await build({stdin:{contents:src,resolveDir:path.join(app,'src'),sourcefile:'hosted-app.js'},bundle:true,format:'esm',minify:true,target:'es2022',outfile:path.join(out,'dist/app.js')});
+let html=await fs.readFile(path.join(app,'index.html'),'utf8');html=html.replaceAll('3D Brain','Skool Agency Brain').replace('<meta name="viewport"','<meta name="robots" content="noindex,nofollow" />\n<meta name="viewport"');const version=createHash('sha256').update(await fs.readFile(path.join(out,'dist/app.js'))).update(await fs.readFile(path.join(app,'style.css'))).digest('hex').slice(0,12);html=html.replace('/dist/app.js','/dist/app.js?v='+version).replace('/style.css','/style.css?v='+version);await fs.writeFile(path.join(out,'index.html'),html);
+for(const file of ['style.css','THIRD-PARTY-NOTICES.txt'])await fs.copyFile(path.join(app,file),path.join(out,file));await fs.writeFile(path.join(out,'robots.txt'),'User-agent: *\nDisallow: /\n');console.log(out);
