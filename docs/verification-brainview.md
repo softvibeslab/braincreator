@@ -22,3 +22,7 @@ Fecha: 2026-10-01. Entorno: https://brainskool.softvibes.art y servicio dedicado
 - Historial conservado al cerrar popup; no se conserva en la interfaz al recargar la página. Sesiones del servidor en memoria con caducidad de dos horas.
 - Evaluación inicial con leads y oferta; no constituye una evaluación exhaustiva de todas las preguntas del curso.
 - Cuota inicial de 200 consultas globales/día, 5 por IP/minuto y 2 simultáneas. Es un límite de uso, no una garantía de coste monetario.
+
+## Mejora de legibilidad
+
+Respuestas Markdown saneadas con títulos, negritas y listas; sin HTML ni enlaces arbitrarios del modelo. Instrucción de respuestas breves con idea principal, pasos separados y una acción siguiente. Tipografía de 15 px, mayor interlineado, panel más ancho y fuentes de tarjetas sin títulos repetidos. La lectura comienza en el inicio de la nueva respuesta.
