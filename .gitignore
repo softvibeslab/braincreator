@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.DS_Store
+__pycache__/
+*.pyc
+*.log
+private/
+.runtime/
+hosting/
+*.zip
